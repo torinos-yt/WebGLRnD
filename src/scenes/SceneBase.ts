@@ -32,7 +32,7 @@ export default class SceneBase
     protected addBasePass(exposure : number) : void
     {
         this.composer.addPass(new RenderPass(this.scene, this.camera));
-        
+
         this.tonePass = new ShaderPass(ToneMapShader);
         this.tonePass.material.uniforms[ "exposure" ].value = exposure;
         this.composer.addPass(this.tonePass);
@@ -40,8 +40,8 @@ export default class SceneBase
         this.fxaaPass = new ShaderPass(FXAAShader);
         const pixelRatio = this.renderer.getPixelRatio();
 
-		this.fxaaPass.material.uniforms[ "resolution" ].value.x = 1 / ( window.innerWidth * pixelRatio );
-		this.fxaaPass.material.uniforms[ "resolution" ].value.y = 1 / ( window.innerHeight * pixelRatio );
+        this.fxaaPass.material.uniforms[ "resolution" ].value.x = 1 / ( window.innerWidth * pixelRatio );
+        this.fxaaPass.material.uniforms[ "resolution" ].value.y = 1 / ( window.innerHeight * pixelRatio );
         this.composer.addPass(this.fxaaPass);
     }
 
@@ -70,6 +70,6 @@ export default class SceneBase
         this.camera.updateProjectionMatrix();  
 
         this.fxaaPass.material.uniforms[ "resolution" ].value.x = 1 / ( window.innerWidth * pixelRatio );
-		this.fxaaPass.material.uniforms[ "resolution" ].value.y = 1 / ( window.innerHeight * pixelRatio );
+        this.fxaaPass.material.uniforms[ "resolution" ].value.y = 1 / ( window.innerHeight * pixelRatio );
     }
 }
