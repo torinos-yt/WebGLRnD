@@ -46,7 +46,7 @@ void main()
 		vec4 pointData = texture2D(textureVerlet, uv);
 		vec3 position = pointData.xyz;
 
-		if(pointData.w != 1.)
+		if(pointData.w > 0.)
 		{
 			vec3 oldP = texture2D(textureVerlet, uv + vec2(0., dUV.y)).xyz;
 
@@ -62,7 +62,9 @@ void main()
 			}
 			
 			if(!isnan(velocity.x))
-				position += velocity + gravity * deltaTime;
+				position += velocity;
+
+			position += gravity * deltaTime;
 
 			if(position.y < ground)
 				position.y = ground;
