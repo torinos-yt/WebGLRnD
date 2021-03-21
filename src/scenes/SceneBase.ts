@@ -47,7 +47,7 @@ export default class SceneBase
 
     protected set exposure(exposure : number)
     {
-        this.tonePass.material.uniforms[ "exposure" ].value = exposure;
+        this.tonePass.material.uniforms[ "exposure" ].value = Math.max(exposure, 0);
     }
 
     public Render(delta? : number) : void

@@ -18,7 +18,7 @@ export const lerp = (x : number, y : number, p : number) : number =>  x + (y - x
 export const initRenderer = () : WebGLRenderer =>
 {
     const canvas = document.querySelector("#render-target") as HTMLCanvasElement;
-    const r = new WebGLRenderer({ canvas, antialias : true });
+    const r = new WebGLRenderer({ canvas });
     r.shadowMap.enabled = true;
     r.shadowMap.type = PCFSoftShadowMap;
     r.toneMapping = NoToneMapping;

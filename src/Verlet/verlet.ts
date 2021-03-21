@@ -3,7 +3,6 @@ import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUCom
 
 import verletPtShader from "../shaders/verletPt.glsl";
 import verletConstrShader from "../shaders/verletConstr.glsl";
-import { Vector3 } from "three";
 
 const perInstanceHeight = 3;
 const subStep = 50;
@@ -171,7 +170,7 @@ export class VerletfromLine extends VerletSimulator
 {
     constructor(renderer : THREE.WebGLRenderer, sample : number, length : number = 100,
                 root : THREE.Vector3 = new THREE.Vector3(),
-                up : THREE.Vector3 = new Vector3(0,1,0), 
+                up : THREE.Vector3 = new THREE.Vector3(0,1,0), 
                 pinFunc? : (index : number, pos : THREE.Vector3) => number)
     {
         super(sample, 1); 

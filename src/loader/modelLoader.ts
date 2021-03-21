@@ -34,7 +34,7 @@ export default class ModelLoader
 
     public async LoadModels() : Promise<void>
     {
-        // Prallel
+        // Parallel
         await Promise.all(Paths.map(async v =>
         {
             console.log(`${v["key"]} : load start`);

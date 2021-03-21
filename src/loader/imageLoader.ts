@@ -32,12 +32,12 @@ export default class ImageLoader
         this.loader = new TextureLoader();
         this.exrloader = new EXRLoader().setDataType(FloatType);
 
-        this.LoadTextures();
+        this.LoadImages();
     }
 
-    public async LoadTextures() : Promise<void>
+    public async LoadImages() : Promise<void>
     {
-        // Prallel
+        // Parallel
         await Promise.all(Paths.map(async v =>
         {
             console.log(`${v["key"]} : load start`);
@@ -47,7 +47,6 @@ export default class ImageLoader
                 await this.exrloader.loadAsync(v["path"]).then(tex =>
                     {
                         ImageLoader.data[v["key"]] = tex;
-
                     });
             }
             else
@@ -66,16 +65,16 @@ export default class ImageLoader
 
 
         /* Straight
-        this.loader.load(Paths[this.counter]["path"], (gltf) =>
+        this.loader.load(Paths[this.counter]["path"], (tex) =>
         {
             const key = Paths[this.counter]["key"];
-            this.data[key] = gltf;
+            this.data[key] = tex;
 
             this.counter++;
             if(this.counter < pathCount)
             {
                 console.log(`${key} : Loaded`);
-                this.LoadTextures();
+                this.LoadImages();
             }
             else
             {

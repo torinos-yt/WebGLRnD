@@ -22,7 +22,7 @@ export class scene1 extends SceneBase
         this.camera = initCamera(110);
         this.verlet = new VerletfromLine(this.renderer, 64);
 
-        const light = new THREE.DirectionalLight(0xffeedd, 2.2);
+        const light = new THREE.DirectionalLight(0xffeedd, 3.66);
         light.position.set(800, 500, 0);
         light.castShadow = true;
         light.shadow.camera.near = 100;
@@ -38,7 +38,7 @@ export class scene1 extends SceneBase
         light.shadow.normalBias = -.003;
         this.scene.add(light);
 
-        this.scene.add(new THREE.AmbientLight(0xbbddff, .55));
+        this.scene.add(new THREE.AmbientLight(0xbbddff, .35));
 
         this.camera.position.x = 381.410;
         this.camera.position.y = 64.97;
@@ -48,7 +48,7 @@ export class scene1 extends SceneBase
         this.defaultY = this.camera.position.y;
 
         const pmGen = new THREE.PMREMGenerator(this.renderer);
-        THREE.DefaultLoadingManager.onLoad = () => { pmGen.dispose(); };
+        THREE.DefaultLoadingManager.onLoad = () => pmGen.dispose();
 
         const envMap = pmGen.fromEquirectangular(ImageLoader.Images["sky0"]).texture;
 
@@ -59,6 +59,8 @@ export class scene1 extends SceneBase
         poleMesh.rotateX(3.1415 * .5);
         poleMesh.translateZ(500);
         this.scene.add(poleMesh);
+
+        this.scene.fog = new THREE.Fog(0xccbbff, 300, 2800);
 
         super.addBasePass(.51);
 
