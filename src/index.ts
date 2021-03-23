@@ -92,7 +92,7 @@ window.addEventListener("DOMContentLoaded", () =>
     }
 
     const curve = new Curves.DecoratedTorusKnot4a(150);
-    verletSimulator = new VerletfromCurve(curve, 256, renderer);
+    verletSimulator = new VerletfromCurve(curve, 128, renderer, 15);
     const debugPlane = new THREE.PlaneGeometry(1000, 30);
     debugPlane.translate(0, 250, 300);
     const debugMat = new THREE.MeshBasicMaterial({color:0xffffff});
@@ -127,7 +127,7 @@ window.addEventListener("DOMContentLoaded", () =>
     {
         if(!initial) return;
         requestAnimationFrame(render);
-        f++; if(f%2==0)return;
+        //f++; if(f%2==0)return;
         const delta = clock.getDelta();
         const k : number = 7;
 
@@ -136,7 +136,7 @@ window.addEventListener("DOMContentLoaded", () =>
         const updateData = 
         {
             "deltaTime" : delta, "IView" : camera.matrixWorld,
-            "IProj" : camera.projectionMatrixInverse
+            "IProj" : camera.projectionMatrixInverse,
         }
         verletSimulator.Compute(updateData);
 
@@ -203,7 +203,7 @@ window.addEventListener("FileLoaded", () =>
     const renderScenes = () : void => 
     {
         requestAnimationFrame(renderScenes);
-        f++; if(f%2==0)return;
+        //f++; if(f%2==0)return;
         const delta = clock.getDelta();
         const k : number = 7;
 

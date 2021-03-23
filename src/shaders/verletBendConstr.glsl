@@ -12,6 +12,7 @@ const float friction = .97;
 void main()
 {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
+	
 
     if(floor(gl_FragCoord.y) == 2.)// restLength Path Through
     {
@@ -21,7 +22,7 @@ void main()
 	else if(floor(gl_FragCoord.y) == 1.)// OldPosition Path Through
     {
 		gl_FragColor = texture2D(textureVerlet, uv);
-        return;
+		return;
     }
 	else // Update Position 
 	{

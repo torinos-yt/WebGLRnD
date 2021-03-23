@@ -38,7 +38,8 @@ void main()
     } 
 	else if(floor(gl_FragCoord.y) == 1.)// Update OldPosition
     {
-		gl_FragColor = texture2D(textureVerlet, uv - vec2(0., dUV.y));
+		float restLength = texture2D(textureVerlet, uv).w;
+		gl_FragColor = vec4(texture2D(textureVerlet, uv - vec2(0., dUV.y)).xyz, restLength);
         return;
     }
 	else // Update Position 

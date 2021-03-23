@@ -20,7 +20,7 @@ void main()
 	else if(floor(gl_FragCoord.y) == 1.)// OldPosition Path Through
     {
 		gl_FragColor = texture2D(textureVerlet, uv);
-        return;
+		return;
     }
 	else // Update Position 
 	{
@@ -32,8 +32,11 @@ void main()
 			vec2 dUV = 1. / resolution.xy;
 
 			// Solve Constraint
-			vec4 restLength = texture2D(textureVerlet, uv + vec2(0., dUV.y * 2.));
-			float prevRestLength = texture2D(textureVerlet, uv + vec2(-dUV.x, dUV.y * 2.)).x;
+			float restLength = texture2D(textureVerlet, uv + vec2(0., dUV.y)).w;
+			if(restLength == 1.) restLength = 50.;
+			float prevRestLength = texture2D(textureVerlet, uv + vec2(-dUV.x, dUV.y)).w;
+			if(prevRestLength == 1.) prevRestLength = 50.;
+
 			
 			float staticFriction = 1.0;
 
@@ -65,7 +68,7 @@ void main()
 			}
 			
 			dist = distance(pos0, pos1);
-			diff = (restLength.x - dist) / dist * stretchStiffness;
+			diff = (restLength - dist) / dist * stretchStiffness;
 			
 			vec3 offset = (pos1 - pos0) * diff * .5;
 			
