@@ -32,8 +32,14 @@ const setCustomVert = (shader : THREE.Shader) =>
 {
     shader.uniforms["verletTexture"] = {value : verletSimulator.DataTexture};
     shader.uniforms["count"] = {value : verletSimulator.VertexCount};
+    shader.uniforms["instanceCount"] = {value : 1};
+    shader.uniforms["iid"] = {value : 0};
+    shader.uniforms["boundY"] = {value : 1290};
     shader.vertexShader = "uniform sampler2D verletTexture;\n" + shader.vertexShader;
     shader.vertexShader = "uniform float count;\n" + shader.vertexShader;
+    shader.vertexShader = "uniform float instanceCount;\n" + shader.vertexShader;
+    shader.vertexShader = "uniform float iid;\n" + shader.vertexShader;
+    shader.vertexShader = "uniform float boundY;\n" + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", parallelTransport);
 }
 
@@ -42,10 +48,10 @@ window.addEventListener("DOMContentLoaded", () =>
     renderer = initRenderer();
     renderer.toneMappingExposure = .85;
 
-    //const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
 
-    new ModelLoader();
-    new ImageLoader();
+    //new ModelLoader();
+    //new ImageLoader();
 
     scene = new THREE.Scene();
 
@@ -92,7 +98,7 @@ window.addEventListener("DOMContentLoaded", () =>
     }
 
     const curve = new Curves.DecoratedTorusKnot4a(150);
-    verletSimulator = new VerletfromCurve(curve, 128, renderer, 15);
+    verletSimulator = new VerletfromCurve(curve, 128, renderer, 30);
     const debugPlane = new THREE.PlaneGeometry(1000, 30);
     debugPlane.translate(0, 250, 300);
     const debugMat = new THREE.MeshBasicMaterial({color:0xffffff});
@@ -203,7 +209,7 @@ window.addEventListener("FileLoaded", () =>
     const renderScenes = () : void => 
     {
         requestAnimationFrame(renderScenes);
-        //f++; if(f%2==0)return;
+        f++; if(f%2==0)return;
         const delta = clock.getDelta();
         const k : number = 7;
 
@@ -226,7 +232,7 @@ const OnResize = () =>
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     
-    scenes.forEach(s => s.Resize());
+    //scenes.forEach(s => s.Resize());
 }
 
 window.addEventListener("resize", OnResize);
