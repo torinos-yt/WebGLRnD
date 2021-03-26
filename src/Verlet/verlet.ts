@@ -20,6 +20,8 @@ class VerletSimulator
 
     private subStep : number;
 
+    private isClose : boolean;
+
     private gpuComputePt : GPUComputationRenderer;
 
     private verletPtVariable : Variable;
@@ -30,11 +32,12 @@ class VerletSimulator
     public verletConstrUniform : {[uniform : string] : THREE.IUniform};
     public verletBendConstrUniform : {[uniform : string] : THREE.IUniform};
 
-    constructor(vertexCount : number, instanceCount : number, subStep : number)
+    constructor(vertexCount : number, instanceCount : number, subStep : number, close : boolean)
     {
         this.width = vertexCount;
         this.height = perInstanceHeight * instanceCount;
         this.subStep = subStep;
+        this.isClose = close;
     }
 
     protected initSimulator(renderer : THREE.WebGLRenderer, data : THREE.Vector3[], pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
@@ -48,7 +51,7 @@ class VerletSimulator
         this.gpuComputePt.setVariableDependencies(this.verletPtVariable, [this.verletPtVariable]);
 
         this.verletConstrVariable = this.gpuComputePt.addVariable("textureVerlet", verletConstrShader, computeTexture);
-        this.gpuComputePt.setVariableDependencies(this.verletConstrVariable, [this.verletConstrVariable]);
+        this.gpuComputePt.setVariableDependencies(this.verletConstrVariable, [this.verletPtVariable]);
 
         this.verletBendConstrVariable = this.gpuComputePt.addVariable("textureVerlet", verletBendConstrShader, computeTexture);
         this.gpuComputePt.setVariableDependencies(this.verletBendConstrVariable, [this.verletConstrVariable]);
@@ -58,8 +61,10 @@ class VerletSimulator
 
         this.verletPtUniform = this.verletPtVariable.material.uniforms;
         this.verletPtUniform["deltaTime"] = { value : 0.0 };
+        this.verletPtUniform["subStep"] = { value : this.subStep - 1 };
+        this.verletPtUniform["currentStep"] = { value : 0 };
         this.verletPtUniform["ground"] = { value : ground };
-        this.verletPtUniform["gravity"] = { value : new THREE.Vector3(0,-9.81*30/this.subStep,0) };
+        this.verletPtUniform["gravity"] = { value : new THREE.Vector3(0,-9.81,0) };
         this.verletPtUniform["groundFriction"] = { value : groundFriction };
         this.verletPtUniform["IView"] = { value : new THREE.Matrix4() };
         this.verletPtUniform["IProj"] = { value : new THREE.Matrix4() };
@@ -67,22 +72,29 @@ class VerletSimulator
         this.verletPtUniform["mouseDelta"] = { value : new THREE.Vector2() };
         this.verletPtUniform["mousePressed"] = { value : false };
 
-        this.verletPtVariable.wrapS = THREE.RepeatWrapping;
-
         this.verletConstrUniform = this.verletConstrVariable.material.uniforms;
-        this.verletConstrUniform["stretchStiffness"] = { value : .75 };
+        this.verletConstrUniform["stretchStiffness"] = { value : .95 };
         this.verletConstrUniform["structureStiffness"] = { value : .3};
         this.verletConstrUniform["ground"] = { value : ground };
         this.verletConstrUniform["groundFriction"] = { value : groundFriction };
 
-        this.verletConstrVariable.wrapS = THREE.RepeatWrapping;
-
         this.verletBendConstrUniform = this.verletBendConstrVariable.material.uniforms;
-        this.verletBendConstrUniform["bendStiffness"] = { value : .1 };
+        this.verletBendConstrUniform["bendStiffness"] = { value : .000001 };
         this.verletBendConstrUniform["ground"] = { value : ground };
         this.verletBendConstrUniform["groundFriction"] = { value : groundFriction };
 
-        this.verletBendConstrVariable.wrapS = THREE.RepeatWrapping;
+        if(this.isClose)
+        {
+            this.verletPtVariable.wrapS = THREE.RepeatWrapping;
+            this.verletConstrVariable.wrapS = THREE.RepeatWrapping;
+            this.verletBendConstrVariable.wrapS = THREE.RepeatWrapping;
+        }
+        else
+        {
+            this.verletPtVariable.wrapS = THREE.ClampToEdgeWrapping;
+            this.verletConstrVariable.wrapS = THREE.ClampToEdgeWrapping;
+            this.verletBendConstrVariable.wrapS = THREE.ClampToEdgeWrapping;
+        }
 
         const error = this.gpuComputePt.init();
 
@@ -94,7 +106,7 @@ class VerletSimulator
         const texArray = texture.image.data;
         const w = this.width * 4;
 
-        const restLengthScale = 1.15;
+        const restLengthScale = 1.;
 
         for(let i = 0; i < this.width; i++)
         {
@@ -114,8 +126,8 @@ class VerletSimulator
             texArray[idx + 2 + 0] = position.z;
             texArray[idx + 2 + w] = position.z;
 
-            const next = data[(i + 1) % this.width];
-            const prev = data[(this.width + i - 1) % this.width];
+            const next = data[close ? (i + 1) % this.width : Math.min(i+1,this.width)];
+            const prev = data[close ? (this.width + i - 1) % this.width : Math.max(i-1,0)];
 
             /* --- restAngle --- */
             const centroid = position.clone().add(next).add(prev).divideScalar(3);
@@ -153,6 +165,7 @@ class VerletSimulator
         this.gpuComputePt.setVariableDependencies(this.verletPtVariable, [this.verletBendConstrVariable]);
         for(let i = 0; i < this.subStep; i++)
         {
+            this.verletPtUniform["currentStep"].value = i;
             this.gpuComputePt.compute();
         }
     }
@@ -172,10 +185,10 @@ class VerletSimulator
 export class VerletfromCurve extends VerletSimulator
 {
     constructor(curve : THREE.Curve<THREE.Vector3>,
-                sample : number, renderer : THREE.WebGLRenderer, substep : number = 35,
-                pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
+                sample : number, renderer : THREE.WebGLRenderer, substep : number = 30,
+                close : boolean = true, pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
     {
-        super(sample, 1, substep); 
+        super(sample, 1, substep, close); 
 
         const posArray = curve.getPoints(sample);
         this.initSimulator(renderer, posArray, pinFunc);
@@ -184,12 +197,12 @@ export class VerletfromCurve extends VerletSimulator
 
 export class VerletfromLine extends VerletSimulator
 {
-    constructor(renderer : THREE.WebGLRenderer, sample : number, substep : number = 35,
+    constructor(renderer : THREE.WebGLRenderer, sample : number, substep : number = 30,
                 length : number = 100, root : THREE.Vector3 = new THREE.Vector3(),
-                up : THREE.Vector3 = new THREE.Vector3(0,1,0), 
+                up : THREE.Vector3 = new THREE.Vector3(0,1,0), close : boolean = true,
                 pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
     {
-        super(sample, 1, substep); 
+        super(sample, 1, substep, close); 
 
         const normUp = up.normalize();
 

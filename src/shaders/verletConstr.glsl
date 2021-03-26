@@ -36,10 +36,8 @@ void main()
 			if(restLength == 1.) restLength = 50.;
 			float prevRestLength = texture2D(textureVerlet, uv + vec2(-dUV.x, dUV.y)).w;
 			if(prevRestLength == 1.) prevRestLength = 50.;
-
 			
 			float staticFriction = 1.0;
-
 
 			vec3 pos0 = texture2D(textureVerlet, uv - vec2(dUV.x, 0.)).xyz;
 			vec3 pos1 = position;

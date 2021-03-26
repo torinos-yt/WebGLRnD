@@ -71,7 +71,15 @@ void main()
 			cDir = (v - c) * (1. - (bendStiffness + nextRestAngle) / distance(v, c));
 			offset += cDir * .5;
 
-			position += offset;
+			if(position.y + offset.y <= ground)
+			{
+				position += offset * groundFriction;
+				position.y = ground;
+			}
+			else
+			{
+				position += offset;
+			}
 		}
 		
 		gl_FragColor = vec4(position, pointData.w);

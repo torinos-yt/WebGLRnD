@@ -1,5 +1,7 @@
 /* --- Uniforms --- */
 uniform float deltaTime;
+uniform float subStep;
+uniform float currentStep;
 
 // Physics Param
 uniform vec3 gravity;
@@ -38,8 +40,15 @@ void main()
     } 
 	else if(floor(gl_FragCoord.y) == 1.)// Update OldPosition
     {
-		float restLength = texture2D(textureVerlet, uv).w;
-		gl_FragColor = vec4(texture2D(textureVerlet, uv - vec2(0., dUV.y)).xyz, restLength);
+		if(subStep == currentStep)
+		{
+			float restLength = texture2D(textureVerlet, uv).w;
+			gl_FragColor = vec4(texture2D(textureVerlet, uv - vec2(0., dUV.y)).xyz, restLength);
+		}
+		else
+		{
+			gl_FragColor = texture2D(textureVerlet, uv);
+		}
         return;
     }
 	else // Update Position 
@@ -47,19 +56,19 @@ void main()
 		vec4 pointData = texture2D(textureVerlet, uv);
 		vec3 position = pointData.xyz;
 
-		if(pointData.w > 0.)
+		if(pointData.w > 0. && subStep == currentStep)
 		{
 			vec3 oldP = texture2D(textureVerlet, uv + vec2(0., dUV.y)).xyz;
 
 			// Solve Point
-			vec3 velocity = (position - oldP) * deltaTime;
+			vec3 velocity = (position - oldP);
 			//velocity += normalize(texture2D(textureVerlet, uv + vec2(dUV.x, 0.)).xyz - position)*deltaTime*.05;
 			//velocity += simplexDFV(position * .5) * deltaTime * .0015;
 			velocity *= friction;
 			
 			if(position.y < ground && length(velocity) > .000001)
 			{
-				velocity *= groundFriction;
+				velocity *= -groundFriction;
 			}
 			
 			if(!isnan(velocity.x))
