@@ -33,9 +33,7 @@ void main()
 
 			// Solve Constraint
 			float restLength = texture2D(textureVerlet, uv + vec2(0., dUV.y)).w;
-			if(restLength == 1.) restLength = 50.;
 			float prevRestLength = texture2D(textureVerlet, uv + vec2(-dUV.x, dUV.y)).w;
-			if(prevRestLength == 1.) prevRestLength = 50.;
 			
 			float staticFriction = 1.0;
 
@@ -74,69 +72,6 @@ void main()
 				offset = vec3(0.);
 			
 			position = pos0 + (prevOffset - offset) * staticFriction;
-			
-			
-			/* ---Structure Constraint--- */
-			/*
-			float off = floor(resolution.x/4.);
-			
-			pos0 = position;
-			pos1 = texture2D(textureVerlet, uv + vec2(dUV.x * off, 0.)).xyz;
-		
-			if(pos0.y <= ground)
-			{ 
-				pos0.y = ground;
-				staticFriction = groundFriction;
-			}
-			
-			dist = distance(pos0, pos1);
-			diff = (restLength.y - dist) / dist * stretchStiffness * structureStiffness;
-			
-			offset = (pos1 - pos0) * diff * .5;
-			
-			if(!isnan(offset.x))
-				pos0 -= offset * staticFriction;
-			
-			position = pos0;
-			
-			pos0 = position;
-			pos1 = texture2D(textureVerlet, uv + vec2(dUV.x * off * 2., 0.)).xyz;
-		
-			if(pos0.y <= ground)
-			{ 
-				pos0.y = ground;
-				staticFriction = groundFriction;
-			}
-			
-			dist = distance(pos0, pos1);
-			diff = (restLength.z - dist) / dist * stretchStiffness * structureStiffness;
-			
-			offset = (pos1 - pos0) * diff * .5;
-			
-			if(!isnan(offset.x))
-				pos0 -= offset * staticFriction;
-			
-			position = pos0;
-
-			pos0 = position;
-			pos1 = texture2D(textureVerlet, uv + vec2(dUV.x * off * 3., 0.)).xyz;
-		
-			if(pos0.y <= ground)
-			{ 
-				pos0.y = ground;
-				staticFriction = groundFriction;
-			}
-			
-			dist = distance(pos0, pos1);
-			diff = (restLength.w - dist) / dist * stretchStiffness * structureStiffness;
-			
-			offset = (pos1 - pos0) * diff * .5;
-			
-			if(!isnan(offset.x))
-				pos0 -= offset * staticFriction;
-			
-			position = pos0;
-			*/
 		}
 		
 		gl_FragColor = vec4(position, pointData.w);

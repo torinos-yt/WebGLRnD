@@ -3,7 +3,7 @@ import { Curves } from "three/examples/jsm/curves/CurveExtras";
 import { VerletfromCurve } from "./Verlet/verlet";
 import ModelLoader from "./loader/modelLoader";
 import ImageLoader from "./loader/imageLoader";
-import { scene1 } from "./scenes";
+import { scene1, scene2 } from "./scenes";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -48,10 +48,10 @@ window.addEventListener("DOMContentLoaded", () =>
     renderer = initRenderer();
     renderer.toneMappingExposure = .85;
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    //const controls = new OrbitControls(camera, renderer.domElement);
 
-    //new ModelLoader();
-    //new ImageLoader();
+    new ModelLoader();
+    new ImageLoader();
 
     scene = new THREE.Scene();
 
@@ -133,7 +133,7 @@ window.addEventListener("DOMContentLoaded", () =>
     {
         if(!initial) return;
         requestAnimationFrame(render);
-        //f++; if(f%2==0)return;
+        f++; if(f%2==0)return;
         const delta = clock.getDelta();
         const k : number = 7;
 
@@ -164,43 +164,7 @@ window.addEventListener("FileLoaded", () =>
 {
     if(!ModelLoader.isComplete || !ImageLoader.isComplete) return;
     
-    const root = ModelLoader.Models["pole"].scene;
-    root.translateY(0);
-    root.translateX(-500);
-    //root.rotateX(-3.1415*.5);
-    root.traverse((node) =>
-    {
-        node.castShadow = true;
-        node.receiveShadow = true;
-        // @ts-ignore
-        if(node.isMesh){
-            /*
-            const mat : THREE.Material = (node as THREE.Mesh).material as THREE.Material;
-            mat.defines = mat.defines || {};
-            mat.defines["USE_CUSTOM_MODEL"] = 1;
-            mat.onBeforeCompile = setCustomVert;
-            (node as THREE.Mesh).material = mat;
-            const depthMat = new THREE.MeshDepthMaterial({ depthPacking : THREE.RGBADepthPacking });
-            const distMat = new THREE.MeshDistanceMaterial();
-            depthMat.defines = depthMat.defines || {};
-            depthMat.defines["MAT_NO_NEED_NORMAL"] = 1;
-            depthMat.defines["USE_CUSTOM_MODEL"] = 1;
-            distMat.defines = distMat.defines || {};
-            distMat.defines["MAT_NO_NEED_NORMAL"] = 1;
-            distMat.defines["USE_CUSTOM_MODEL"] = 1
-
-            depthMat.onBeforeCompile = setCustomVert
-            distMat.onBeforeCompile = setCustomVert;
-        
-            node.customDepthMaterial = depthMat;
-            node.customDistanceMaterial = distMat;
-            */
-        }
-    })
-
-    scene.add(root);
-    
-    scenes = [new scene1()];
+    scenes = [new scene1(), new scene2()];
     OnResize();
 
     // strict fps
@@ -216,7 +180,9 @@ window.addEventListener("FileLoaded", () =>
         //camera.position.y = lerp(-window.scrollY, camera.position.y, Math.exp(-k * delta));
 
         scenes[0].Render(delta);
+        scenes[1].Render(delta);
     }
+    
     initial = false;
     renderScenes();
 });
@@ -232,7 +198,7 @@ const OnResize = () =>
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     
-    //scenes.forEach(s => s.Resize());
+    scenes.forEach(s => s.Resize());
 }
 
 window.addEventListener("resize", OnResize);

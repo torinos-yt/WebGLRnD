@@ -12,6 +12,11 @@ const Paths : {[key : string] : string }[] =
         type : "env",
         key : "sky0",
         path : "../../public/textures/env/BOCO_skies_christmas_2.exr"
+    },
+    {
+        type : "tex",
+        key : "skyBG0",
+        path : "../../public/textures/sky_BG0.jpg"
     }
 ];
 
@@ -38,6 +43,7 @@ export default class ImageLoader
     public async LoadImages() : Promise<void>
     {
         // Parallel
+        /*
         await Promise.all(Paths.map(async v =>
         {
             console.log(`${v["key"]} : load start`);
@@ -62,27 +68,51 @@ export default class ImageLoader
         }));
 
         window.dispatchEvent(new Event("FileLoaded"));
-
-
-        /* Straight
-        this.loader.load(Paths[this.counter]["path"], (tex) =>
-        {
-            const key = Paths[this.counter]["key"];
-            this.data[key] = tex;
-
-            this.counter++;
-            if(this.counter < pathCount)
-            {
-                console.log(`${key} : Loaded`);
-                this.LoadImages();
-            }
-            else
-            {
-                console.log(`${key} : Loaded`);
-                window.dispatchEvent(new Event("ModelLoaded"));
-            }
-        })
         */
+
+
+        // Straight
+        if(Paths[ImageLoader.counter]["type"] == "env")
+        {
+            this.exrloader.load(Paths[ImageLoader.counter]["path"], (tex) =>
+            {
+                const key = Paths[ImageLoader.counter]["key"];
+                ImageLoader.data[key] = tex;
+
+                ImageLoader.counter++;
+                if(ImageLoader.counter < pathCount)
+                {
+                    console.log(`${key} : Loaded`);
+                    this.LoadImages();
+                }
+                else
+                {
+                    console.log(`${key} : Loaded`);
+                    window.dispatchEvent(new Event("FileLoaded"));
+                }
+            })
+        }
+        else
+        {
+            this.loader.load(Paths[ImageLoader.counter]["path"], (tex) =>
+            {
+                const key = Paths[ImageLoader.counter]["key"];
+                ImageLoader.data[key] = tex;
+
+                ImageLoader.counter++;
+                if(ImageLoader.counter < pathCount)
+                {
+                    console.log(`${key} : Loaded`);
+                    this.LoadImages();
+                }
+                else
+                {
+                    console.log(`${key} : Loaded`);
+                    window.dispatchEvent(new Event("FileLoaded"));
+                }
+            })
+        }
+        
     }
 
     public static get LoadCounter() : number { return this.counter / pathCount; }

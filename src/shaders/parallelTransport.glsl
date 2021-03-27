@@ -1,8 +1,18 @@
 vec3 dUV = vec3(1. / count, 1. / (instanceCount * 2.), 0.);
 
+vec3 vPosition;
+
+#if defined( Z_UP )
+    vPosition = position.xzy * vec3(1.,1.,-1.);
+    position = position.xzy;
+#else
+    vPosition = position.xyz;
+#endif
+
+vPosition *= vec3(1.,0.,1.);
+
 #if defined( USE_CUSTOM_MODEL )
-    vec3 vPosition = position.xyz * vec3(1.,1.,0.);
-    vec2 sampleUV = vec2(position.z / boundY, dUV.y * iid) + dUV.xy * .5;
+    vec2 sampleUV = vec2(position.y / boundY, dUV.y * iid) + dUV.xy * .5;
 
     vec3 pos  = texture2D(verletTexture, sampleUV).xyz;
     vec3 nPos = texture2D(verletTexture, sampleUV+dUV.xz).xyz;
@@ -15,11 +25,10 @@ vec3 dUV = vec3(1. / count, 1. / (instanceCount * 2.), 0.);
     vec3 zDir = normalize(cross(xDir, yDir));
 
     mat4 mat = mat4(vec4(xDir, 0),
-                    vec4(-zDir, 0),
                     vec4(yDir, 0),
+                    vec4(zDir, 0),
                     vec4(pos , 1));
 #else
-    vec3 vPosition = position.xyz * vec3(1.,0.,1.);
     vec2 sampleUV = vec2(uv.y, dUV.y * iid) + dUV.xy * .5;
 
     vec3 pos  = texture2D(verletTexture, sampleUV).xyz;

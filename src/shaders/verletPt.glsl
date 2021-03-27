@@ -15,6 +15,11 @@ uniform vec2 mouse;
 uniform vec2 mouseDelta;
 uniform bool mousePressed;
 
+uniform vec3 root;
+uniform vec3 tip;
+uniform bool rootConstraint;
+uniform bool tipConstraint;
+
 /* --- Const Params ---*/
 const float friction = .97;
 
@@ -88,6 +93,13 @@ void main()
 				float dist = distance(camPos, position); 			
 				position = camPos + mouseDir * dist;
 			}
+		}
+
+		// root & tip Constraint
+		if(subStep == currentStep)
+		{
+			if(rootConstraint && floor(gl_FragCoord.x) == 0.) position = root;
+			if(tipConstraint && floor(gl_FragCoord.x) == resolution.x-1.) position = tip;
 		}
 		
 		gl_FragColor = vec4(position, pointData.w);

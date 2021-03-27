@@ -8,7 +8,8 @@ import
     Mesh,
     MeshStandardMaterial,
     Group,
-    NoToneMapping
+    NoToneMapping,
+    Vector4,
 } from "three";
 
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
@@ -42,7 +43,7 @@ export const initCamera = (focalLength : number) : PerspectiveCamera =>
     return cam;
 }
 
-export const extractMeshes = (root : GLTF, envMap? : Texture) : Group =>
+export const extractMeshes = (root : GLTF, envMap? : Texture, frustomCull : boolean = true) : Group =>
 {
     const group : Group = new Group();
 
@@ -52,16 +53,39 @@ export const extractMeshes = (root : GLTF, envMap? : Texture) : Group =>
         if(node.isMesh)
         {
             const geom = (node as Mesh).geometry;
-            const mat = ((node as Mesh).material as MeshStandardMaterial);
+            const mat = new MeshStandardMaterial().copy(((node as Mesh).material as MeshStandardMaterial));
             mat.envMap = envMap;
 
             const mesh = new Mesh(geom, mat);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
 
+            mesh.frustumCulled = frustomCull;
             group.add(mesh);
         }
     });
 
     return group;
+}
+
+export const getTextureDatas = (texture : Texture) : ImageData =>
+{
+    const canvas = document.createElement("canvas");
+    canvas.width = texture.image.width;
+    canvas.height = texture.image.height;
+
+    const context = canvas.getContext("2d");
+    context.drawImage(texture.image, 0, 0);
+
+    return context.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+export const getPixelData = (imageData : ImageData, x : number, y : number) : Vector4 =>
+{
+    const pos = (x + imageData.width * y) * 4;
+
+    return new Vector4(imageData.data[pos],
+                       imageData.data[pos + 1],
+                       imageData.data[pos + 2],
+                       imageData.data[pos + 3],);
 }

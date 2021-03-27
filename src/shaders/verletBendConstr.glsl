@@ -71,12 +71,12 @@ void main()
 			cDir = (v - c) * (1. - (bendStiffness + nextRestAngle) / distance(v, c));
 			offset += cDir * .5;
 
-			if(position.y + offset.y <= ground)
+			if(position.y + offset.y <= ground && !isnan(offset.x))
 			{
 				position += offset * groundFriction;
 				position.y = ground;
 			}
-			else
+			else if(!isnan(offset.x))
 			{
 				position += offset;
 			}

@@ -6,6 +6,26 @@ const Paths : {[key : string] : string}[] =
     {
         key : "pole",
         path : "../../public/models/ElectricityPole_map.glb"
+    },
+    {
+        key : "cable",
+        path : "../../public/models/Cable.glb"
+    },
+    {
+        key : "cable2",
+        path : "../../public/models/Cable2.glb"
+    },
+    {
+        key : "cableWind",
+        path : "../../public/models/CableWind.glb"
+    },
+    {
+        key : "cableWind2",
+        path : "../../public/models/CableWind2.glb"
+    },
+    {
+        key : "cableWind3",
+        path : "../../public/models/CableWind3.glb"
     }
 ];
 
@@ -35,6 +55,7 @@ export default class ModelLoader
     public async LoadModels() : Promise<void>
     {
         // Parallel
+        /*
         await Promise.all(Paths.map(async v =>
         {
             console.log(`${v["key"]} : load start`);
@@ -48,16 +69,16 @@ export default class ModelLoader
         }));
 
         window.dispatchEvent(new Event("FileLoaded"));
+        */
 
-
-        /* Straight
-        this.loader.load(Paths[this.counter]["path"], (gltf) =>
+        // Straight
+        this.loader.load(Paths[ModelLoader.counter]["path"], (gltf) =>
         {
-            const key = Paths[this.counter]["key"];
-            this.data[key] = gltf;
+            const key = Paths[ModelLoader.counter]["key"];
+            ModelLoader.data[key] = gltf;
 
-            this.counter++;
-            if(this.counter < pathCount)
+            ModelLoader.counter++;
+            if(ModelLoader.counter < pathCount)
             {
                 console.log(`${key} : Loaded`);
                 this.LoadModels();
@@ -65,10 +86,10 @@ export default class ModelLoader
             else
             {
                 console.log(`${key} : Loaded`);
-                window.dispatchEvent(new Event("ModelLoaded"));
+                window.dispatchEvent(new Event("FileLoaded"));
             }
         })
-        */
+        
     }
 
     public static get LoadCounter() : number { return this.counter / pathCount; }
