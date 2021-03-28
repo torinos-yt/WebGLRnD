@@ -3,12 +3,12 @@ import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass";
 
 import SceneBase from "./SceneBase";
 import { VerletfromLine, VerletfromArray } from "../Verlet/verlet";
-import parallelTransport from "../shaders/parallelTransport.glsl";
-import { lerp, initCamera, extractMeshes, getTextureDatas, getPixelData } from "../util";
+import { lerp, initCamera, extractMeshes, VerletMesh } from "../util";
 import ModelLoader from "../loader/modelLoader";
 import ImageLoader from "../loader/imageLoader";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Vector3 } from "three";
 
 export class scene1 extends SceneBase
 {
@@ -18,7 +18,8 @@ export class scene1 extends SceneBase
     private verletTop : VerletfromLine;
     private verletConstr : VerletfromLine[];
 
-    private defaultY : number;
+    private defaultPos : THREE.Vector3;
+    private zDir : THREE.Vector3;
 
     private sao : SAOPass;
 
@@ -28,12 +29,23 @@ export class scene1 extends SceneBase
 
     private first : boolean;
 
+    private cameraPivot : THREE.Group;
+
+    private xAngle : number;
+    private yAngle : number;
+
     constructor(renderer : THREE.WebGLRenderer)
     {
         super(renderer);
         this.valid = true;
         this.camera = initCamera(180);
+        this.cameraPivot = new THREE.Group();
+        this.cameraPivot.add(this.camera);
+        this.scene.add(this.cameraPivot);
         this.first = true;
+
+        this.xAngle = 0;
+        this.yAngle = 0;
 
         let num = 16;
         this.verlet = new VerletfromLine
@@ -80,7 +92,7 @@ export class scene1 extends SceneBase
                                           Math.cos(Math.PI*.5 * (div * i) + Math.PI), 0);
 
             pos.multiply(new THREE.Vector3(150,70,100)).add(new THREE.Vector3(-20, 627, 75.5));
-            posArray[i] = pos
+            posArray[i] = pos;
         }
         this.verletConstr = new Array(3);
         for(let i = 0; i < 3; i++)
@@ -94,7 +106,7 @@ export class scene1 extends SceneBase
         }
 
         { // DirectionalLight
-            const light = new THREE.DirectionalLight(0xffeedd, 3.66);
+            const light = new THREE.DirectionalLight(0xffeedd, 2.66);
             light.position.set(800, 500, 0);
             light.castShadow = true;
             light.shadow.camera.near = 100;
@@ -111,7 +123,7 @@ export class scene1 extends SceneBase
             this.scene.add(light);
         }
 
-        this.scene.add(new THREE.AmbientLight(0xbbddff, .45));
+        this.scene.add(new THREE.AmbientLight(0xbbddff, .2));
 
         this.camera.position.x = 1303.68;
         this.camera.position.y = -285.674;
@@ -120,7 +132,8 @@ export class scene1 extends SceneBase
 
         this.prevY = this.camera.position.y;
 
-        this.defaultY = this.camera.position.y;
+        this.defaultPos = this.camera.position.clone();
+        this.zDir = new THREE.Vector3(0,this.defaultPos.y,0).sub(this.defaultPos).normalize();
 
         const pmGen = new THREE.PMREMGenerator(this.renderer);
         THREE.DefaultLoadingManager.onLoad = () => pmGen.dispose();
@@ -130,7 +143,9 @@ export class scene1 extends SceneBase
         this.scene.background = envMap;
     
         this.bg = ImageLoader.Images["skyBG0"];
+        this.bg.repeat.x = .9;
         this.bg.repeat.y = .9;
+        this.bg.wrapS = THREE.MirroredRepeatWrapping;
         this.bg.wrapT = THREE.MirroredRepeatWrapping;
         this.scene.background = this.bg;
 
@@ -169,7 +184,7 @@ export class scene1 extends SceneBase
         wire.translateX(490);
         wire.updateMatrix();
         let mat : THREE.MeshStandardMaterial = ((wire.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial);
-        this.VerletMesh(wire.children[0] as THREE.Mesh, mat, envMap, this.verlet.DataTexture, 10000, this.verlet.VertexCount);
+        VerletMesh(wire.children[0] as THREE.Mesh, mat, envMap, this.verlet.DataTexture, 10000, this.verlet.VertexCount);
 
         this.scene.add(wire);
 
@@ -180,7 +195,7 @@ export class scene1 extends SceneBase
         wire2.translateX(490);
         wire2.updateMatrix();
         mat = ((wire2.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial);
-        this.VerletMesh(wire2.children[0] as THREE.Mesh, mat, envMap, this.verlet.DataTexture, 10000, this.verlet.VertexCount);
+        VerletMesh(wire2.children[0] as THREE.Mesh, mat, envMap, this.verlet.DataTexture, 10000, this.verlet.VertexCount);
 
         this.scene.add(wire2);
 
@@ -191,7 +206,7 @@ export class scene1 extends SceneBase
         wire3.translateX(490);
         wire3.updateMatrix();
         mat = ((wire3.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial);
-        this.VerletMesh(wire3.children[0] as THREE.Mesh, mat, envMap, this.verlet2.DataTexture, 10000, this.verlet2.VertexCount);
+        VerletMesh(wire3.children[0] as THREE.Mesh, mat, envMap, this.verlet2.DataTexture, 10000, this.verlet2.VertexCount);
 
         this.scene.add(wire3);
 
@@ -202,18 +217,18 @@ export class scene1 extends SceneBase
         wire4.translateX(490);
         wire4.updateMatrix();
         mat = ((wire4.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial);
-        this.VerletMesh(wire4.children[0] as THREE.Mesh, mat, envMap, this.verlet2.DataTexture, 10000, this.verlet2.VertexCount);
+        VerletMesh(wire4.children[0] as THREE.Mesh, mat, envMap, this.verlet2.DataTexture, 10000, this.verlet2.VertexCount);
 
         this.scene.add(wire4);
 
-        const wire5 = extractMeshes(ModelLoader.Models["cableWind3"], envMap, false);
+        const wire5 = extractMeshes(ModelLoader.Models["cableWind4"], envMap, false);
         wire5.scale.set(.2,.25,.2);
         wire5.translateY(422);
         wire5.translateZ(40);
         wire5.translateX(490);
         wire5.updateMatrix();
         mat = ((wire5.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial);
-        this.VerletMesh(wire5.children[0] as THREE.Mesh, mat, envMap, this.verlet3.DataTexture, 10000, this.verlet3.VertexCount);
+        VerletMesh(wire5.children[0] as THREE.Mesh, mat, envMap, this.verlet3.DataTexture, 10000, this.verlet3.VertexCount);
 
         this.scene.add(wire5);
 
@@ -245,7 +260,7 @@ export class scene1 extends SceneBase
                     mesh.setMatrixAt(i+2, dummy.matrix);
                 }
 
-                this.VerletMesh(mesh, mat, envMap, this.verletTop.DataTexture, 1270, this.verletTop.VertexCount)
+                VerletMesh(mesh, mat, envMap, this.verletTop.DataTexture, 1270, this.verletTop.VertexCount)
 
                 this.scene.add(mesh);
             }
@@ -273,7 +288,7 @@ export class scene1 extends SceneBase
                     dum.updateMatrix();
                     mesh.setMatrixAt(1, dum.matrix);
 
-                    this.VerletMesh(mesh, matcpy, envMap, this.verletConstr[i].DataTexture, 400, this.verletConstr[i].VertexCount);
+                    VerletMesh(mesh, matcpy, envMap, this.verletConstr[i].DataTexture, 400, this.verletConstr[i].VertexCount);
 
                     this.scene.add(mesh);
                 }
@@ -283,8 +298,6 @@ export class scene1 extends SceneBase
         this.scene.fog = new THREE.Fog(0xbbddff, 100, 13000);
 
         super.addBasePass(.85);
-
-        //new OrbitControls(this.camera, this.renderer.domElement);
 
         { // SAO Pass
             this.sao = new SAOPass(this.scene, this.camera, true, true);
@@ -301,14 +314,26 @@ export class scene1 extends SceneBase
         }
     }
 
-    public Render(delta : number, t : number) : void
+    public Render(delta : number, t : number, mouse : THREE.Vector2, mouseDelta : THREE.Vector2) : void
     {
         if(!this.valid) return;
-        this.camera.position.y = lerp(this.defaultY - window.scrollY*.5, this.camera.position.y, Math.exp(-2.5 * delta));
-        this.bg.offset.y = lerp((window.scrollY*-.00001)+.1, this.bg.offset.y, Math.exp(-7 * delta));
+        //ScrollY
+        this.cameraPivot.position.y = lerp(this.defaultPos.y - window.scrollY*.5 + 300, this.cameraPivot.position.y, Math.exp(-2.5 * delta));
 
+        // Angle from Mouse
+        this.yAngle = lerp((mouse.x - .5) * -.08, this.yAngle, Math.exp(-3.5 * delta));
+        this.xAngle = lerp((mouse.y - .5) * -.06, this.xAngle, Math.exp(-3.5 * delta));
+        const q = new THREE.Quaternion().setFromAxisAngle(this.zDir.clone().cross(new Vector3(0,1,0)), this.xAngle);
+        q.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, this.yAngle, 0)));
+        this.cameraPivot.setRotationFromQuaternion(q);
+
+        // BG Angle from Mouse
+        this.bg.offset.y = lerp((window.scrollY*-.00001)+.1+(mouse.y-.5)*-.15, this.bg.offset.y, Math.exp(-2 * delta));
+        this.bg.offset.x = lerp((mouse.x-.5)*.04, this.bg.offset.x, Math.exp(-2 * delta));
+
+        // gravity
         const deltaY : number = window.scrollY - this.prevY;
-        const gravY : number = lerp(-9.81, -deltaY*3, Math.max(Math.min(Math.abs(deltaY)*.05, 1), 0));
+        const gravY : number = lerp(-9.81, -deltaY*4, Math.max(Math.min(Math.abs(deltaY)*.05, 1), 0));
         const gravity = this.first? new THREE.Vector3(0,0,0) : new THREE.Vector3(0, gravY, 0);
 
         this.prevY = window.scrollY;
@@ -333,50 +358,6 @@ export class scene1 extends SceneBase
 
         this.first = false;
 
-        super.Render(delta, t);
-    }
-
-    private VerletMesh(mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.MeshStandardMaterial,
-                       env : THREE.Texture, data : THREE.Texture, bound : number, count : number) : void
-    {
-        mat.defines = mat.defines || {};
-        mat.defines["USE_CUSTOM_MODEL"] = 1;
-        mat.envMap = env;
-
-        const setCustomVert = (shader : THREE.Shader) =>
-        {
-            shader.uniforms["verletTexture"] = {value : data};
-            shader.uniforms["count"] = {value : count};
-            shader.uniforms["instanceCount"] = {value : 1};
-            shader.uniforms["iid"] = {value : 0};
-            shader.uniforms["boundY"] = {value : bound};
-            shader.vertexShader = "uniform sampler2D verletTexture;\n" + shader.vertexShader;
-            shader.vertexShader = "uniform float count;\n" + shader.vertexShader;
-            shader.vertexShader = "uniform float instanceCount;\n" + shader.vertexShader;
-            shader.vertexShader = "uniform float iid;\n" + shader.vertexShader;
-            shader.vertexShader = "uniform float boundY;\n" + shader.vertexShader;
-            shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", parallelTransport);
-        };
-
-        mat.onBeforeCompile = setCustomVert;
-        let depthMat = new THREE.MeshDepthMaterial({ depthPacking : THREE.RGBADepthPacking });
-        let distMat = new THREE.MeshDistanceMaterial();
-        depthMat.defines = depthMat.defines || {};
-        depthMat.defines["MAT_NO_NEED_NORMAL"] = 1;
-        depthMat.defines["USE_CUSTOM_MODEL"] = 1;
-        distMat.defines = distMat.defines || {};
-        distMat.defines["MAT_NO_NEED_NORMAL"] = 1;
-        distMat.defines["USE_CUSTOM_MODEL"] = 1;
-
-        depthMat.onBeforeCompile = setCustomVert;
-        distMat.onBeforeCompile = setCustomVert;
-    
-        mesh.customDepthMaterial = depthMat;
-        mesh.customDistanceMaterial = distMat;
-
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        mesh.frustumCulled = false;
+        super.Render(delta, t, mouse, mouseDelta);
     }
 }
