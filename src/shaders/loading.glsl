@@ -3,6 +3,7 @@ precision mediump float;
 uniform float aspect;
 uniform float t;
 uniform float completion;
+uniform vec2 mouse;
 varying vec2 vUv;
 
 float sdBox( in vec2 p, in vec2 b )
@@ -48,6 +49,7 @@ float gain(float x, float k)
 void main() 
 {
     vec2 uv = vec2(vUv.x * aspect, vUv.y);
+    uv += (mouse * vec2(1,-1) - .5)*.05;
 
     float scale = 40.;
     vec2 suv = uv * scale;
@@ -58,7 +60,7 @@ void main()
 
     float speed = .2;
 
-    float rand = noise(grid*45. + t*.4) * .15 - .35;
+    float rand = noise(grid*45. + t*.4) * .15 - .44;
     float randp = t*speed + rand;
 
     float circle = float(grid.y > randp);

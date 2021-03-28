@@ -15,7 +15,7 @@ export class scene2 extends SceneBase
     constructor(renderer : THREE.WebGLRenderer)
     {
         super(renderer);
-        this.valid = true;
+        this.valid = false;
         this.camera = initCamera(60);
 
         const boxGeom = new THREE.BoxGeometry(300,300,300);

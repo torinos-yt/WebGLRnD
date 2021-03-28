@@ -126,7 +126,7 @@ export class scene1 extends SceneBase
         this.scene.add(new THREE.AmbientLight(0xbbddff, .2));
 
         this.camera.position.x = 1303.68;
-        this.camera.position.y = -285.674;
+        this.camera.position.y = -165.674;
         this.camera.position.z = 943.331;
         this.camera.setRotationFromEuler(new THREE.Euler(.8582, .84651, -.6953));
 
@@ -321,8 +321,8 @@ export class scene1 extends SceneBase
         this.cameraPivot.position.y = lerp(this.defaultPos.y - window.scrollY*.5 + 300, this.cameraPivot.position.y, Math.exp(-2.5 * delta));
 
         // Angle from Mouse
-        this.yAngle = lerp((mouse.x - .5) * -.08, this.yAngle, Math.exp(-3.5 * delta));
-        this.xAngle = lerp((mouse.y - .5) * -.06, this.xAngle, Math.exp(-3.5 * delta));
+        this.yAngle = lerp((mouse.x - .5) * -.08, this.yAngle, Math.exp(-4.5 * delta));
+        this.xAngle = lerp((mouse.y - .5) * -.08, this.xAngle, Math.exp(-4.5 * delta));
         const q = new THREE.Quaternion().setFromAxisAngle(this.zDir.clone().cross(new Vector3(0,1,0)), this.xAngle);
         q.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, this.yAngle, 0)));
         this.cameraPivot.setRotationFromQuaternion(q);
@@ -360,4 +360,5 @@ export class scene1 extends SceneBase
 
         super.Render(delta, t, mouse, mouseDelta);
     }
+
 }

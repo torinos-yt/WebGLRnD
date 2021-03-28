@@ -2,7 +2,7 @@ export const TransitionShader =
 {
     uniforms: {
         "tDiffuse": { value: null },
-        "t": { value : 0}
+        "t": { value : 0 }
 	},
 	vertexShader: [
 		"varying vec2 vUv;",

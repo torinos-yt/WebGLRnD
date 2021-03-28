@@ -35,6 +35,7 @@ window.addEventListener("FileLoaded", () =>
     initial = false;
 
     console.log("Loading Comlete");
+    loading.transition = true;
 });
 
 window.addEventListener("DOMContentLoaded", () => 
@@ -59,7 +60,7 @@ window.addEventListener("DOMContentLoaded", () =>
         {
             scenes.forEach(scene =>
             {
-                //scene.Render(delta, 0, mouse, mouseDelta);
+                scene.Render(delta, 0, mouse, mouseDelta);
                 renderer.clearDepth();
             });
         }
