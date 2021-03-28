@@ -40,7 +40,6 @@
 *.m4a binary
 *.ac3 binary
 
-
 *.otf binary
 *.eot binary
 *.svg binary
@@ -51,3 +50,4 @@
 # Project
 *.gltf binary
 *.glb binary
+*.exr binary
