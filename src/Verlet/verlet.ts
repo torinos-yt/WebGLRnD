@@ -6,6 +6,7 @@ import verletConstrShader from "../shaders/verletConstr.glsl";
 import verletBendConstrShader from "../shaders/verletBendConstr.glsl";
 
 import readRenderTargetShader from "../shaders/readRenderTarget.glsl";
+import { isSafari } from "../util";
 
 const perInstanceHeight = 2;
 
@@ -50,6 +51,8 @@ class VerletSimulator
     {
         this.renderer = renderer;
         this.gpuComputePt = new GPUComputationRenderer(this.width, this.height, this.renderer);
+
+        //if(isSafari) this.gpuComputePt.setDataType(THREE.HalfFloatType);
 
         const computeTexture = this.gpuComputePt.createTexture();
         this.initTextureData(computeTexture, data, pinFunc);

@@ -50,12 +50,12 @@ export class scene2 extends SceneBase
         super.addBasePass(.5);
     }
 
-    public Render(delta : number, t : number) : void
+    public Render(delta : number, t : number, mouse : THREE.Vector2, mouseDelta : THREE.Vector2) : void
     {
         if(!this.valid) return;
         this.mesh.rotateX(delta*.2);
         this.mesh.rotateY(delta);
         this.mesh.rotateZ(delta*.6);
-        super.Render(delta, t);
+        super.Render(delta, t, mouse, mouseDelta);
     }
 }

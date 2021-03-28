@@ -4,15 +4,19 @@ import
     PCFSoftShadowMap,
     Texture,
     sRGBEncoding,
+    RGBADepthPacking,
     PerspectiveCamera,
     Mesh,
     MeshStandardMaterial,
+    MeshDepthMaterial,
+    MeshDistanceMaterial,
     Group,
     NoToneMapping,
     Vector4,
 } from "three";
 
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import parallelTransport from "../shaders/parallelTransport.glsl";
 
 export const lerp = (x : number, y : number, p : number) : number =>  x + (y - x) * p;
 
@@ -20,6 +24,8 @@ export const initRenderer = () : WebGLRenderer =>
 {
     const canvas = document.querySelector("#render-target") as HTMLCanvasElement;
     const r = new WebGLRenderer({ canvas });
+    r.toneMappingExposure = .85;
+    r.autoClear = false;
     r.shadowMap.enabled = true;
     r.shadowMap.type = PCFSoftShadowMap;
     r.toneMapping = NoToneMapping;
@@ -68,6 +74,57 @@ export const extractMeshes = (root : GLTF, envMap? : Texture, frustomCull : bool
     return group;
 }
 
+export const VerletMesh = (mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.MeshStandardMaterial,
+    env : THREE.Texture, data : THREE.Texture, bound : number, count : number, zUp : boolean = false) : void =>
+{
+    mat.defines = mat.defines || {};
+    mat.defines["USE_CUSTOM_MODEL"] = 1;
+    mat.envMap = env;
+
+    const setCustomVert = (shader : THREE.Shader) =>
+    {
+        shader.uniforms["verletTexture"] = {value : data};
+        shader.uniforms["count"] = {value : count};
+        shader.uniforms["instanceCount"] = {value : 1};
+        shader.uniforms["iid"] = {value : 0};
+        shader.uniforms["boundY"] = {value : bound};
+        shader.vertexShader = "uniform sampler2D verletTexture;\n" + shader.vertexShader;
+        shader.vertexShader = "uniform float count;\n" + shader.vertexShader;
+        shader.vertexShader = "uniform float instanceCount;\n" + shader.vertexShader;
+        shader.vertexShader = "uniform float iid;\n" + shader.vertexShader;
+        shader.vertexShader = "uniform float boundY;\n" + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", parallelTransport);
+    };
+
+    mat.onBeforeCompile = setCustomVert;
+    let depthMat = new MeshDepthMaterial({ depthPacking : RGBADepthPacking });
+    let distMat = new MeshDistanceMaterial();
+    depthMat.defines = depthMat.defines || {};
+    depthMat.defines["MAT_NO_NEED_NORMAL"] = 1;
+    depthMat.defines["USE_CUSTOM_MODEL"] = 1;
+    distMat.defines = distMat.defines || {};
+    distMat.defines["MAT_NO_NEED_NORMAL"] = 1;
+    distMat.defines["USE_CUSTOM_MODEL"] = 1;
+
+    if(zUp)
+    {
+        mat.defines["Z_UP"] = 1;
+        depthMat.defines["Z_UP"] = 1;
+        distMat.defines["Z_UP"] = 1;
+    }
+
+    depthMat.onBeforeCompile = setCustomVert;
+    distMat.onBeforeCompile = setCustomVert;
+
+    mesh.customDepthMaterial = depthMat;
+    mesh.customDistanceMaterial = distMat;
+
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+
+    mesh.frustumCulled = false;
+}
+
 export const getTextureDatas = (texture : Texture) : ImageData =>
 {
     const canvas = document.createElement("canvas");
@@ -89,3 +146,6 @@ export const getPixelData = (imageData : ImageData, x : number, y : number) : Ve
                        imageData.data[pos + 2],
                        imageData.data[pos + 3],);
 }
+
+export const isSafari = () : boolean =>
+    !!navigator.userAgent.match( /Safari/i ) && !navigator.userAgent.match( /Chrome/i );

@@ -115,7 +115,9 @@ export default class ImageLoader
         
     }
 
-    public static get LoadCounter() : number { return this.counter / pathCount; }
+    public static get LoadCounter() : number { return this.counter; }
+
+    public static get PathCount() : number { return pathCount; }
 
     public static get isComplete() : boolean { return this.counter == pathCount; }
 }

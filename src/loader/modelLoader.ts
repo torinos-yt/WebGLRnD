@@ -8,6 +8,10 @@ const Paths : {[key : string] : string}[] =
         path : "../../public/models/ElectricityPole_map.glb"
     },
     {
+        key : "pole_decimate",
+        path : "../../public/models/ElectricityPole_Decimate.glb"
+    },
+    {
         key : "cable",
         path : "../../public/models/Cable.glb"
     },
@@ -26,6 +30,10 @@ const Paths : {[key : string] : string}[] =
     {
         key : "cableWind3",
         path : "../../public/models/CableWind3.glb"
+    },
+    {
+        key : "cableWind4",
+        path : "../../public/models/CableWind4.glb"
     }
 ];
 
@@ -92,7 +100,9 @@ export default class ModelLoader
         
     }
 
-    public static get LoadCounter() : number { return this.counter / pathCount; }
+    public static get LoadCounter() : number { return this.counter; }
+
+    public static get PathCount() : number { return pathCount; }
 
     public static get isComplete() : boolean { return this.counter == pathCount; }
 }

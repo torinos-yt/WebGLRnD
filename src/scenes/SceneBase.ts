@@ -39,7 +39,8 @@ export default class SceneBase
         const width = window.innerWidth;
         const height = window.innerHeight;
 
-        const parameters = {
+        const parameters = 
+        {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
             format: THREE.RGBAFormat,
@@ -84,7 +85,7 @@ export default class SceneBase
         this.tonePass.material.uniforms[ "exposure" ].value = Math.max(exposure, 0);
     }
 
-    public Render(delta : number, t : number) : void
+    public Render(delta : number, t : number, mouse : THREE.Vector2, mouseDelta : THREE.Vector2) : void
     {
         if(this.beforeRender)
         {
