@@ -12,6 +12,8 @@ import
     MeshDistanceMaterial,
     Group,
     NoToneMapping,
+    Vector2,
+    Vector3,
     Vector4,
 } from "three";
 
@@ -19,6 +21,14 @@ import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import parallelTransport from "../shaders/parallelTransport.glsl";
 
 export const lerp = (x : number, y : number, p : number) : number =>  x + (y - x) * p;
+export const lerpVec2 = (x : Vector2, y : Vector2, p : number) : Vector2 =>
+{
+    return new Vector2(lerp(x.x, y.x, p), lerp(x.y , y.y, p));
+};
+export const lerpVec3 = (x : Vector3, y : Vector3, p : number) : Vector3 =>
+{
+    return new Vector3(lerp(x.x, y.x, p), lerp(x.y , y.y, p), lerp(x.z , y.z, p));
+}
 
 export const initRenderer = () : WebGLRenderer =>
 {
