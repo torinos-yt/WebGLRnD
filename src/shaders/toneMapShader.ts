@@ -31,7 +31,7 @@ export const ToneMapShader =
 		"varying vec2 vUv;",
 		"void main() {",
 		"	vec4 tex = texture2D( tDiffuse, vUv );",
-		"	gl_FragColor = LinearTosRGB(vec4(ACESFilmicCurve(tex.rgb * exposure), tex.a));",
+		"	gl_FragColor = LinearTosRGB(vec4(ACESFilmicCurve(tex.rgb * exposure)*1.15, tex.a));",
 		"}"
 	].join( "\n" )
 };
