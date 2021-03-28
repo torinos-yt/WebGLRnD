@@ -28,9 +28,9 @@ export class scene1 extends SceneBase
 
     private first : boolean;
 
-    constructor()
+    constructor(renderer : THREE.WebGLRenderer)
     {
-        super();
+        super(renderer);
         this.valid = true;
         this.camera = initCamera(180);
         this.first = true;
@@ -65,7 +65,7 @@ export class scene1 extends SceneBase
         num = 18;
         this.verletTop = new VerletfromLine
         (
-            this.renderer, num, 60, 1210,
+            this.renderer, num, 60, 1197,
             new THREE.Vector3(15, 614, 26),
             new THREE.Vector3(-1,0,0), false, false, false, 
             (i, p) => i < 2 || i >= num-2
@@ -111,7 +111,7 @@ export class scene1 extends SceneBase
             this.scene.add(light);
         }
 
-        this.scene.add(new THREE.AmbientLight(0xbbddff, .65));
+        this.scene.add(new THREE.AmbientLight(0xbbddff, .45));
 
         this.camera.position.x = 1303.68;
         this.camera.position.y = -285.674;
@@ -133,7 +133,6 @@ export class scene1 extends SceneBase
         this.bg.repeat.y = .9;
         this.bg.wrapT = THREE.MirroredRepeatWrapping;
         this.scene.background = this.bg;
-        //this.scene.background = this.verletTop.DataTexture;
 
         const pole = ModelLoader.Models["pole"];
         pole.scene.traverse((node) =>
@@ -283,7 +282,7 @@ export class scene1 extends SceneBase
 
         this.scene.fog = new THREE.Fog(0xbbddff, 100, 13000);
 
-        super.addBasePass(.61);
+        super.addBasePass(.85);
 
         //new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -302,10 +301,10 @@ export class scene1 extends SceneBase
         }
     }
 
-    public Render(delta : number) : void
+    public Render(delta : number, t : number) : void
     {
         if(!this.valid) return;
-        this.camera.position.y = lerp(this.defaultY - window.scrollY*.3, this.camera.position.y, Math.exp(-4.5 * delta));
+        this.camera.position.y = lerp(this.defaultY - window.scrollY*.5, this.camera.position.y, Math.exp(-2.5 * delta));
         this.bg.offset.y = lerp((window.scrollY*-.00001)+.1, this.bg.offset.y, Math.exp(-7 * delta));
 
         const deltaY : number = window.scrollY - this.prevY;
@@ -334,7 +333,7 @@ export class scene1 extends SceneBase
 
         this.first = false;
 
-        super.Render();
+        super.Render(delta, t);
     }
 
     private VerletMesh(mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.MeshStandardMaterial,

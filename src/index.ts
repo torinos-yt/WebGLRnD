@@ -26,7 +26,10 @@ let scene : THREE.Scene;
 
 let scenes : SceneBase[];
 
+let Mesh : THREE.Mesh;
+
 let initial = true;
+let render : () => void;
 
 const setCustomVert = (shader : THREE.Shader) =>
 {
@@ -47,6 +50,7 @@ window.addEventListener("DOMContentLoaded", () =>
 {
     renderer = initRenderer();
     renderer.toneMappingExposure = .85;
+    renderer.autoClear = false;
 
     //const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -85,6 +89,8 @@ window.addEventListener("DOMContentLoaded", () =>
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
+
+    Mesh = mesh;
 
     for(let i = 0; i < 5; i++)
     {
@@ -129,13 +135,16 @@ window.addEventListener("DOMContentLoaded", () =>
 
     // strict fps
     let f = 0;
-    const render = () : void => 
+    render = () : void => 
     {
         if(!initial) return;
         requestAnimationFrame(render);
-        f++; if(f%2==0)return;
         const delta = clock.getDelta();
         const k : number = 7;
+
+        Mesh.rotateX(.5 * delta);
+        Mesh.rotateY(.8 * delta);
+        Mesh.rotateZ(.3 * delta);
 
         //camera.position.y = lerp(-window.scrollY, camera.position.y, Math.exp(-k * delta));
 
@@ -164,7 +173,7 @@ window.addEventListener("FileLoaded", () =>
 {
     if(!ModelLoader.isComplete || !ImageLoader.isComplete) return;
     
-    scenes = [new scene1(), new scene2()];
+    scenes = [new scene1(renderer), new scene2(renderer)];
     OnResize();
 
     // strict fps
@@ -177,13 +186,27 @@ window.addEventListener("FileLoaded", () =>
         const delta = clock.getDelta();
         const k : number = 7;
 
-        //camera.position.y = lerp(-window.scrollY, camera.position.y, Math.exp(-k * delta));
+        // camera.position.y = lerp(-window.scrollY, camera.position.y, Math.exp(-k * delta));
+        scenes[1].Render(delta, 0);
+        renderer.clearDepth();
+        scenes[0].Render(delta, 0.);
+        renderer.clearDepth();
 
-        scenes[0].Render(delta);
-        scenes[1].Render(delta);
+        Mesh.rotateX(.5 * delta);
+        Mesh.rotateY(.8 * delta);
+        Mesh.rotateZ(.3 * delta);
+
+        const updateData = 
+        {
+            "deltaTime" : delta, "IView" : camera.matrixWorld,
+            "IProj" : camera.projectionMatrixInverse,
+        }
+        verletSimulator.Compute(updateData);
+        //renderer.render(scene, camera);
     }
-    
+
     initial = false;
+
     renderScenes();
 });
 

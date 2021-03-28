@@ -10,20 +10,22 @@ import ImageLoader from "../loader/imageLoader";
 
 export class scene2 extends SceneBase
 {
+    private mesh;
 
-    constructor()
+    constructor(renderer : THREE.WebGLRenderer)
     {
-        super();
+        super(renderer);
         this.valid = true;
         this.camera = initCamera(60);
 
         const boxGeom = new THREE.BoxGeometry(300,300,300);
         const material = new THREE.MeshStandardMaterial();
-        const mesh = new THREE.Mesh(boxGeom, material);
-        mesh.rotation.set(60, 16.8, -16);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        this.scene.add(mesh);
+        this.mesh = new THREE.Mesh(boxGeom, material);
+        this.mesh.rotation.set(60, 16.8, -16);
+        this.mesh.castShadow = true;
+        this.mesh = new THREE.Mesh(boxGeom, material);
+        this.mesh.receiveShadow = true;
+        this.scene.add(this.mesh);
 
         this.scene.add(new THREE.AmbientLight(0xffffff, .05));
 
@@ -45,12 +47,15 @@ export class scene2 extends SceneBase
             this.scene.add(light);
         }
 
-        this.addBasePass(.5);
+        super.addBasePass(.5);
     }
 
-    public Render(delta : number) : void
+    public Render(delta : number, t : number) : void
     {
         if(!this.valid) return;
-        super.Render();
+        this.mesh.rotateX(delta*.2);
+        this.mesh.rotateY(delta);
+        this.mesh.rotateZ(delta*.6);
+        super.Render(delta, t);
     }
 }
