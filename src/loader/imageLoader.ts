@@ -11,12 +11,12 @@ const Paths : {[key : string] : string }[] =
     {
         type : "env",
         key : "sky0",
-        path : "../../public/textures/env/BOCO_skies_christmas_2.exr"
+        path : "../public/textures/env/env_comp.exr"
     },
     {
         type : "tex",
         key : "skyBG0",
-        path : "../../public/textures/sky_BG0.jpg"
+        path : "../public/textures/sky_BG0.jpg"
     }
 ];
 

@@ -38,12 +38,7 @@ void main()
     vec2 uv = gl_FragCoord.xy / resolution.xy;
     vec2 dUV = 1. / resolution.xy;
 
-    if(floor(gl_FragCoord.y) == 2.)// restLength Path Through
-    {
-		gl_FragColor = texture2D(textureVerlet, uv);
-        return;
-    } 
-	else if(floor(gl_FragCoord.y) == 1.)// Update OldPosition
+	if(mod(floor(gl_FragCoord.y), 2.) == 1.)// Update OldPosition
     {
 		if(subStep == currentStep)
 		{

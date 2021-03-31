@@ -5,35 +5,39 @@ const Paths : {[key : string] : string}[] =
 [
     {
         key : "pole",
-        path : "../../public/models/ElectricityPole_map.glb"
+        path : "../public/models/ElectricityPole_map.glb"
     },
     {
         key : "pole_decimate",
-        path : "../../public/models/ElectricityPole_Decimate.glb"
+        path : "../public/models/ElectricityPole_Decimate.glb"
     },
     {
         key : "cable",
-        path : "../../public/models/Cable.glb"
+        path : "../public/models/Cable.glb"
     },
     {
         key : "cable2",
-        path : "../../public/models/Cable2.glb"
+        path : "../public/models/Cable2.glb"
     },
     {
         key : "cableWind",
-        path : "../../public/models/CableWind.glb"
+        path : "../public/models/CableWind.glb"
     },
     {
         key : "cableWind2",
-        path : "../../public/models/CableWind2.glb"
+        path : "../public/models/CableWind2.glb"
     },
     {
         key : "cableWind3",
-        path : "../../public/models/CableWind3.glb"
+        path : "../public/models/CableWind3.glb"
     },
     {
         key : "cableWind4",
-        path : "../../public/models/CableWind4.glb"
+        path : "../public/models/CableWind4.glb"
+    },
+    {
+        key : "camera",
+        path : "../public/models/CameraAnimation.glb"
     }
 ];
 
@@ -54,7 +58,7 @@ export default class ModelLoader
         this.loader = new GLTFLoader();
         this.dracoLoader = new DRACOLoader();
 
-        this.dracoLoader.setDecoderPath("../../node_modules/three/examples/js/libs/draco/gltf/");
+        this.dracoLoader.setDecoderPath("https://www.gstatic.com/draco/v1/decoders/");
         this.loader.setDRACOLoader(this.dracoLoader);
 
         this.LoadModels();

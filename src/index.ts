@@ -29,13 +29,16 @@ window.addEventListener("FileLoaded", () =>
 {
     if(!ModelLoader.isComplete || !ImageLoader.isComplete) return;
     
-    scenes = [new scene2(renderer), new scene1(renderer)];
-    OnResize();
-
-    initial = false;
-
-    console.log("Loading Comlete");
-    loading.transition = true;
+    setTimeout(() =>
+    {
+        scenes = [/*new scene2(renderer), */new scene1(renderer)];
+        OnResize();
+    
+        initial = false;
+    
+        console.log("Loading Comlete");
+        loading.transition = true;
+    }, 500);
 });
 
 window.addEventListener("DOMContentLoaded", () => 
@@ -53,7 +56,7 @@ window.addEventListener("DOMContentLoaded", () =>
     render = () : void => 
     {
         requestAnimationFrame(render);
-        f++; if(f%2==0)return;
+        //f++; if(f%2==0)return;
         const delta = clock.getDelta();
 
         if(!initial)

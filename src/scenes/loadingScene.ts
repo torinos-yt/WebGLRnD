@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import LoadingShader from "../shaders/loading.glsl";
 import { LoadingTransitionShader } from "../shaders/loadingTransitionShader";
-import { lerp, lerpVec2 } from "../util";
+import { lerp, lerpVec2, rawVertexShader } from "../util";
 import { RawShaderMaterial } from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
@@ -35,7 +35,7 @@ export class LoadingScene
     private time : number = 0;
     private completion : number = 0;
 
-    private loadTime : number = 5.0;
+    private loadTime : number = 8.0;
 
     private mouse : THREE.Vector2 = new THREE.Vector2();
 
@@ -65,19 +65,7 @@ export class LoadingScene
         const quad = new THREE.PlaneBufferGeometry(2,2);
         this.material = new THREE.RawShaderMaterial(
             {
-                vertexShader : 
-                [
-                    "precision mediump float;",
-                    "uniform mat4 modelViewMatrix;",
-                    "uniform mat4 projectionMatrix;",
-                    "attribute vec3 position;",
-                    "attribute vec2 uv;",
-                    "varying vec2 vUv;",
-                    "void main(){",
-                    "   vUv = uv;",
-                    "   gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
-                    "}"
-                ].join("\n"),
+                vertexShader : rawVertexShader,
                 fragmentShader : LoadingShader,
                 uniforms : 
                 {
@@ -97,19 +85,7 @@ export class LoadingScene
         const loadQuad = new THREE.PlaneBufferGeometry(.42*.7,.075*.7);
         this.loadBarMaterial = new THREE.RawShaderMaterial(
             {
-                vertexShader : 
-                [
-                    "precision highp float;",
-                    "uniform mat4 modelViewMatrix;",
-                    "uniform mat4 projectionMatrix;",
-                    "attribute vec3 position;",
-                    "attribute vec2 uv;",
-                    "varying vec2 vUv;",
-                    "void main(){",
-                    "   vUv = uv;",
-                    "   gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
-                    "}"
-                ].join("\n"),
+                vertexShader : rawVertexShader,
                 fragmentShader : 
                 [
                     "precision highp float;",
@@ -150,19 +126,7 @@ export class LoadingScene
         const captionQuad = new THREE.PlaneBufferGeometry(.42*.5,.075*.33);
         this.CaptionMaterial = new RawShaderMaterial(
             {
-                vertexShader : 
-                [
-                    "precision highp float;",
-                    "uniform mat4 modelViewMatrix;",
-                    "uniform mat4 projectionMatrix;",
-                    "attribute vec3 position;",
-                    "attribute vec2 uv;",
-                    "varying vec2 vUv;",
-                    "void main(){",
-                    "   vUv = uv;",
-                    "   gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
-                    "}"
-                ].join("\n"),
+                vertexShader : rawVertexShader,
                 fragmentShader : 
                 [
                     "precision highp float;",
@@ -201,7 +165,7 @@ export class LoadingScene
         this.captionMesh.scale.y = width / height;
         this.scene.add(this.captionMesh);
 
-        const path = "../../public/textures/top_serif.png";
+        const path = "../public/textures/top_serif.png";
         new THREE.TextureLoader().load(path, (tex) =>
         {
             this.CaptionMaterial.uniforms["tex"].value = tex;

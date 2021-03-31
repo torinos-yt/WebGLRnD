@@ -81,7 +81,7 @@ void main()
 
     vec2 ts = vec2(shapefade*rs.x*4., 0.);
 
-    if(rand > -.3) ts = ts.yx;
+    if(rand > -.33) ts = ts.yx;
 
     float rect0 = sdBox(center - rs * 2. + ts, rs);
     float rect1 = sdBox(center               , rs);

@@ -40,6 +40,7 @@ export const initRenderer = () : WebGLRenderer =>
     r.shadowMap.type = PCFSoftShadowMap;
     r.toneMapping = NoToneMapping;
     r.outputEncoding = sRGBEncoding;
+    r.physicallyCorrectLights = true;
 
     return r;
 }
@@ -85,7 +86,8 @@ export const extractMeshes = (root : GLTF, envMap? : Texture, frustomCull : bool
 }
 
 export const VerletMesh = (mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.MeshStandardMaterial,
-    env : THREE.Texture, data : THREE.Texture, bound : number, count : number, zUp : boolean = false) : void =>
+                           env : THREE.Texture, data : THREE.Texture, bound : number, count : number, 
+                           zUp : boolean = false, instanceCount : number = 1) : void =>
 {
     mat.defines = mat.defines || {};
     mat.defines["USE_CUSTOM_MODEL"] = 1;
@@ -95,8 +97,7 @@ export const VerletMesh = (mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.
     {
         shader.uniforms["verletTexture"] = {value : data};
         shader.uniforms["count"] = {value : count};
-        shader.uniforms["instanceCount"] = {value : 1};
-        shader.uniforms["iid"] = {value : 0};
+        shader.uniforms["instanceCount"] = {value : instanceCount};
         shader.uniforms["boundY"] = {value : bound};
         shader.vertexShader = "uniform sampler2D verletTexture;\n" + shader.vertexShader;
         shader.vertexShader = "uniform float count;\n" + shader.vertexShader;
@@ -135,6 +136,20 @@ export const VerletMesh = (mesh : THREE.Mesh | THREE.InstancedMesh, mat : THREE.
     mesh.frustumCulled = false;
 }
 
+export const rawVertexShader : string =
+[
+    "precision highp float;",
+    "uniform mat4 modelViewMatrix;",
+    "uniform mat4 projectionMatrix;",
+    "attribute vec3 position;",
+    "attribute vec2 uv;",
+    "varying vec2 vUv;",
+    "void main(){",
+    "   vUv = uv;",
+    "   gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
+    "}"
+].join("\n");
+
 export const getTextureDatas = (texture : Texture) : ImageData =>
 {
     const canvas = document.createElement("canvas");
@@ -154,7 +169,7 @@ export const getPixelData = (imageData : ImageData, x : number, y : number) : Ve
     return new Vector4(imageData.data[pos],
                        imageData.data[pos + 1],
                        imageData.data[pos + 2],
-                       imageData.data[pos + 3],);
+                       imageData.data[pos + 3]);
 }
 
 export const isSafari = () : boolean =>

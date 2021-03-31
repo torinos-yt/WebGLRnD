@@ -7,6 +7,7 @@ import verletBendConstrShader from "../shaders/verletBendConstr.glsl";
 
 import readRenderTargetShader from "../shaders/readRenderTarget.glsl";
 import { isSafari } from "../util";
+import { Vector3 } from "three";
 
 const perInstanceHeight = 2;
 
@@ -85,6 +86,7 @@ class VerletSimulator
         this.verletPtUniform["tip"] = { value : data[this.width-1] };
         this.verletPtUniform["rotConstraint"] = { value : this.rootConstr };
         this.verletPtUniform["tipConstraint"] = { value : this.tipConstr };
+        this.verletPtUniform["close"] = { value : this.isClose };
 
         this.verletConstrUniform = this.verletConstrVariable.material.uniforms;
         this.verletConstrUniform["stretchStiffness"] = { value : .96 };
@@ -148,34 +150,40 @@ class VerletSimulator
 
         const restLengthScale = 1.;
 
-        for(let i = 0; i < this.width; i++)
+        for(let j = 0; j < this.height / 2; j++)
         {
-            const idx = i * 4;
-            const position = data[i];
+            const iid = j * this.width;
+            const texiid = iid * 2;
 
-            /* --- position --- */
-            // x
-            texArray[idx + 0 + 0] = position.x;
-            texArray[idx + 0 + w] = position.x;
+            for(let i = 0; i < this.width; i++)
+            {
+                const idx = (texiid + i) * 4;
+                const position = data[iid + i];
 
-            // y
-            texArray[idx + 1 + 0] = position.y;
-            texArray[idx + 1 + w] = position.y;
+                /* --- position --- */
+                // x
+                texArray[idx + 0 + 0] = position.x;
+                texArray[idx + 0 + w] = position.x;
 
-            // z
-            texArray[idx + 2 + 0] = position.z;
-            texArray[idx + 2 + w] = position.z;
+                // y
+                texArray[idx + 1 + 0] = position.y;
+                texArray[idx + 1 + w] = position.y;
 
-            const next = data[close ? (i + 1) % this.width : Math.min(i+1,this.width)];
-            const prev = data[close ? (this.width + i - 1) % this.width : Math.max(i-1,0)];
+                // z
+                texArray[idx + 2 + 0] = position.z;
+                texArray[idx + 2 + w] = position.z;
 
-            /* --- restAngle --- */
-            const centroid = position.clone().add(next).add(prev).divideScalar(3);
-            texArray[idx + 3 + 0] = Math.max(position.distanceTo(centroid), 2) * (pinFunc(i, position) ? -1 : 1);
+                const next = data[close ? iid + ((i + 1) % this.width) : iid + Math.min(i+1,this.width)];
+                const prev = data[close ? iid + ((this.width + i - 1) % this.width) : iid + Math.max(i-1,0)];
 
-            /* --- restLength --- */
-            // To Next Vertex
-            texArray[idx + 3 + w] = position.distanceTo(next) * restLengthScale;
+                /* --- restAngle --- */
+                const centroid = position.clone().add(next).add(prev).divideScalar(3);
+                texArray[idx + 3 + 0] = Math.max(position.distanceTo(centroid), 2) * (pinFunc(i, position) ? -1 : 1);
+
+                /* --- restLength --- */
+                // To Next Vertex
+                texArray[idx + 3 + w] = position.distanceTo(next) * restLengthScale;
+            }
         }
     }
 
@@ -276,6 +284,41 @@ export class VerletfromArray extends VerletSimulator
                 pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
     {
         super(posArray.length, 1, substep, close, rootConstr, tipConstr); 
+
+        this.initSimulator(renderer, posArray, pinFunc);
+    }
+}
+
+export class InstancedVerletfromLine extends VerletSimulator
+{
+    constructor(renderer : THREE.WebGLRenderer, sample : number, substep : number = 30,
+        matrices : THREE.Matrix4[], length : number = 100,
+        up : THREE.Vector3 = new THREE.Vector3(0,1,0), close : boolean = true,
+        rootConstr : boolean = false, tipConstr : boolean = false,
+        pinFunc? : (index : number, pos : THREE.Vector3) => boolean)
+    {
+        super(sample, matrices.length, substep, close, rootConstr, tipConstr);
+
+        up.normalize();
+        
+        const posArray : THREE.Vector3[] = new Array(sample * matrices.length);
+
+        for(let i = 0; i < matrices.length; i++)
+        {
+            const pos = new THREE.Vector3(matrices[i].elements[12], matrices[i].elements[13], matrices[i].elements[14]);
+            posArray[i*sample] = pos;
+        }
+
+        for(let i = 0; i < matrices.length; i++)
+        {
+            for(let j = 1; j < sample; j++)
+            {
+                const index = (i * sample) + j;
+                const pos = new THREE.Vector3().copy(posArray[index - 1]);
+                pos.add(new THREE.Vector3().copy(up).multiplyScalar(length / (sample-1)));
+                posArray[index] = pos;
+            }
+        }
 
         this.initSimulator(renderer, posArray, pinFunc);
     }

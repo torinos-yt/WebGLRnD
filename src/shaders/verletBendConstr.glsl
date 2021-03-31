@@ -5,6 +5,7 @@ uniform float stretchStiffness;
 uniform float structureStiffness;
 uniform float ground;
 uniform float groundFriction;
+uniform bool close;
 
 /* --- Const Params ---*/
 const float friction = .97;
@@ -14,12 +15,7 @@ void main()
     vec2 uv = gl_FragCoord.xy / resolution.xy;
 	
 
-    if(floor(gl_FragCoord.y) == 2.)// restLength Path Through
-    {
-		gl_FragColor = texture2D(textureVerlet, uv);
-        return;
-    } 
-	else if(floor(gl_FragCoord.y) == 1.)// OldPosition Path Through
+	if(mod(floor(gl_FragCoord.y), 2.) == 1.)// OldPosition Path Through
     {
 		gl_FragColor = texture2D(textureVerlet, uv);
 		return;
@@ -32,6 +28,10 @@ void main()
 		if(pointData.w > 0.)
 		{	
 			vec2 dUV = 1. / resolution.xy;
+
+			float xid = floor(gl_FragCoord.x);
+			bool stop = xid <= 0. || xid >= resolution.x - 1.;
+			stop = stop && !close;
 
 			// Solve Bend Constraint
 			float restAngle = abs(pointData.w);
@@ -46,6 +46,8 @@ void main()
 			vec4 nnextPoint = texture2D(textureVerlet, uv + vec2( dUV.x * 2., 0.));
 
 			float div =  1. / 3.;
+
+			bool s;
 			
 			vec3 b0 = prevPoint.xyz;
 			vec3 b1 = nextPoint.xyz;
@@ -71,12 +73,12 @@ void main()
 			cDir = (v - c) * (1. - (bendStiffness + nextRestAngle) / distance(v, c));
 			offset += cDir * .5;
 
-			if(position.y + offset.y <= ground && !isnan(offset.x))
+			if(position.y + offset.y <= ground && !isnan(offset.x) && !stop)
 			{
 				position += offset * groundFriction;
 				position.y = ground;
 			}
-			else if(!isnan(offset.x))
+			else if(!isnan(offset.x) && !stop)
 			{
 				position += offset;
 			}

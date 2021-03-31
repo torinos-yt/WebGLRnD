@@ -47,31 +47,31 @@ export class scene1 extends SceneBase
         this.xAngle = 0;
         this.yAngle = 0;
 
-        let num = 16;
+        let num = 30;
         this.verlet = new VerletfromLine
         (
             this.renderer, num, 60, 10000,
             new THREE.Vector3(-250, 0, .25),
             new THREE.Vector3(-1,0,0), false, false, false,
-            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-5 || i < 2 || i >= num-2
+            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-8 || i < 2 || i >= num-2
         );
 
-        num = 25;
+        num = 35;
         this.verlet2 = new VerletfromLine
         (
             this.renderer, num, 60, 10000,
             new THREE.Vector3(-550, 0, .25),
             new THREE.Vector3(-1,0,0), false, false, false,
-            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-7 || i < 2 || i >= num-2
+            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-10 || i < 2 || i >= num-2
         );
 
-        num = 20;
+        num = 30;
         this.verlet3 = new VerletfromLine
         (
             this.renderer, num, 60, 10000,
             new THREE.Vector3(-550, 0, .25),
             new THREE.Vector3(-1,0,0), false, false, false,
-            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-5 || i < 2 || i >= num-2
+            (i, p) => (-2700 < p.x && p.x < -2400) || i == num-8 || i < 2 || i >= num-2
         );
 
         num = 18;
@@ -106,7 +106,7 @@ export class scene1 extends SceneBase
         }
 
         { // DirectionalLight
-            const light = new THREE.DirectionalLight(0xffeedd, 2.66);
+            const light = new THREE.DirectionalLight(0xffeedd, 3.66);
             light.position.set(800, 500, 0);
             light.castShadow = true;
             light.shadow.camera.near = 100;
@@ -321,8 +321,8 @@ export class scene1 extends SceneBase
         this.cameraPivot.position.y = lerp(this.defaultPos.y - window.scrollY*.5 + 300, this.cameraPivot.position.y, Math.exp(-2.5 * delta));
 
         // Angle from Mouse
-        this.yAngle = lerp((mouse.x - .5) * -.08, this.yAngle, Math.exp(-4.5 * delta));
-        this.xAngle = lerp((mouse.y - .5) * -.08, this.xAngle, Math.exp(-4.5 * delta));
+        this.yAngle = lerp((mouse.x - .5) * -.08, this.yAngle, Math.exp(-1.5 * delta));
+        this.xAngle = lerp((mouse.y - .5) * -.08, this.xAngle, Math.exp(-1.5 * delta));
         const q = new THREE.Quaternion().setFromAxisAngle(this.zDir.clone().cross(new Vector3(0,1,0)), this.xAngle);
         q.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, this.yAngle, 0)));
         this.cameraPivot.setRotationFromQuaternion(q);
@@ -338,10 +338,10 @@ export class scene1 extends SceneBase
 
         this.prevY = window.scrollY;
 
-        this.verlet.Compute({"deltaTime" : delta, "gravity" : gravity});
+        this.verlet.Compute({"deltaTime" : delta, "gravity" : gravity.multiplyScalar(.8)});
         this.verlet2.Compute({"deltaTime" : delta, "gravity" : gravity});
         this.verlet3.Compute({"deltaTime" : delta, "gravity" : gravity});
-        this.verletTop.Compute({"deltaTime" : delta, "gravity" : gravity.multiplyScalar(.3)});
+        this.verletTop.Compute({"deltaTime" : delta, "gravity" : gravity.multiplyScalar(.5)});
 
         const targetPos = this.verletTop.ReadData(new THREE.Vector2(.156, 0));
 

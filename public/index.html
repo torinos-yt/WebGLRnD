@@ -8,12 +8,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
         $(function() {
-            $('html,body').animate({ scrollTop: 0 }, '1');
+            $('html,body').animate({ scrollTop: 0 }, '0');
         });
     </script>
 </head>
 <body>
     <div id = "scroll"></div>
     <canvas id = "render-target"></canvas>
+    <script>
+        //なぜか2つないとスクロールが戻らない...?
+        $(function() {
+            $('html,body').animate({ scrollTop: 0 }, '0');
+        });
+    </script>
 </body>
 </html>
