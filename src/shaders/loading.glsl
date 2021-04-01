@@ -80,6 +80,7 @@ void main()
     vec2 rs = vec2(.12); 
 
     vec2 ts = vec2(shapefade*rs.x*4., 0.);
+    ts.x -= clamp(sin(max(t-8.-distance(grid, vec2(.5*aspect,.5)), 0.) * .8) * 3.5, 0., rs.x*4.);
 
     if(rand > -.33) ts = ts.yx;
 

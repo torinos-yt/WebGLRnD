@@ -33,6 +33,7 @@ export class LoadingScene
     public valid : boolean;
 
     private time : number = 0;
+    private imageLoadtime : number = 0;
     private completion : number = 0;
 
     private loadTime : number = 8.0;
@@ -169,6 +170,7 @@ export class LoadingScene
         new THREE.TextureLoader().load(path, (tex) =>
         {
             this.CaptionMaterial.uniforms["tex"].value = tex;
+            this.imageLoadtime = this.time;
         });
 
         this.composer.addPass(new RenderPass(this.scene, this.camera));
@@ -195,7 +197,7 @@ export class LoadingScene
         this.loadBarMaterial.uniforms["t"].value = this.time;
         this.loadBarMaterial.uniforms["completion"].value = completionTime;
 
-        this.CaptionMaterial.uniforms["t"].value = this.time;
+        this.CaptionMaterial.uniforms["t"].value = this.imageLoadtime==0? 0 : this.time- this.imageLoadtime;
 
         if(this.transition && completionTime >= .996)
         {
